@@ -33,6 +33,12 @@ variable "eni_ids" {
   default     = []
 }
 
+variable "kinesis_stream_enabled" {
+  description = "Enables Kinesis Stream"
+  type        = bool
+  default     = true
+}
+
 variable "shard_count" {
   description = "Number of shards that the stream will use"
   type        = number

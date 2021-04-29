@@ -3,6 +3,7 @@ module "kinesis_label" {
   version = "0.24.1"
 
   context    = module.this.context
+  enabled    = var.kinesis_stream_enabled
   attributes = ["kinesis"]
 }
 
@@ -11,11 +12,12 @@ module "subscription_filter_label" {
   version = "0.24.1"
 
   context    = module.this.context
+  enabled    = var.kinesis_stream_enabled
   attributes = ["filter"]
 }
 
 resource "aws_kinesis_stream" "default" {
-  count               = module.this.enabled ? 1 : 0
+  count               = module.this.enabled && var.kinesis_stream_enabled ? 1 : 0
   name                = module.kinesis_label.id
   shard_count         = var.shard_count
   retention_period    = var.retention_period
@@ -26,7 +28,7 @@ resource "aws_kinesis_stream" "default" {
 }
 
 resource "aws_cloudwatch_log_subscription_filter" "default" {
-  count           = module.this.enabled ? 1 : 0
+  count           = module.this.enabled && var.kinesis_stream_enabled ? 1 : 0
   name            = module.subscription_filter_label.id
   log_group_name  = join("", aws_cloudwatch_log_group.default.*.name)
   filter_pattern  = var.filter_pattern

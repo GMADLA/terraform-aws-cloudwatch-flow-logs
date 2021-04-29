@@ -45,6 +45,7 @@ resource "aws_iam_role" "log" {
 }
 
 data "aws_iam_policy_document" "kinesis_assume" {
+  count = module.this.enabled && var.kinesis_stream_enabled ? 1 : 0
   statement {
     actions = ["sts:AssumeRole"]
 
@@ -56,6 +57,7 @@ data "aws_iam_policy_document" "kinesis_assume" {
 }
 
 data "aws_iam_policy_document" "kinesis" {
+  count = module.this.enabled && var.kinesis_stream_enabled ? 1 : 0
   statement {
     actions = [
       "kinesis:PutRecord*",
@@ -70,14 +72,14 @@ data "aws_iam_policy_document" "kinesis" {
 }
 
 resource "aws_iam_role" "kinesis" {
-  count              = module.this.enabled ? 1 : 0
+  count              = module.this.enabled && var.kinesis_stream_enabled ? 1 : 0
   name               = module.kinesis_label.id
-  assume_role_policy = data.aws_iam_policy_document.kinesis_assume.json
+  assume_role_policy = join("", data.aws_iam_policy_document.kinesis_assume.*.json)
 }
 
 resource "aws_iam_role_policy" "kinesis" {
-  count  = module.this.enabled ? 1 : 0
+  count  = module.this.enabled && var.kinesis_stream_enabled ? 1 : 0
   name   = module.vpc_label.id
   role   = join("", aws_iam_role.kinesis.*.id)
-  policy = data.aws_iam_policy_document.kinesis.json
+  policy = join("", data.aws_iam_policy_document.kinesis.*.json)
 }
